@@ -11,7 +11,8 @@ Install Dependencies:
 Then simply clone this repo.
 
 ## Usage
-
+`code todo_bot.zsh`
+If you want it to run at login simply put the todo_bot.zsh script in your .zshrc.
 
 
 
