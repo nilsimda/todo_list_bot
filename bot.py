@@ -8,11 +8,14 @@ import schedule
 import telebot
 
 # fill in your own values
-bot = telebot.TeleBot("TOKEN")
-chat_id = 123456789
-friend_username = "max_mustermann"
-email = "youremail@gmail.com"
-
+with open("data.txt", 'r') as f:
+    data = f.read().splitlines()
+    
+bot = telebot.TeleBot(data[0])
+chat_id = int(data[1])
+friend_username = data[2]
+email = data[3]
+todolist_path = data[4]
 
 @bot.message_handler(commands=["start", "help"])
 def send_help(message):
@@ -29,12 +32,12 @@ def add_todo_item(message):
     item_id = args[0]
     description = " ".join(args[1:])
 
-    with open("todolist.json", "r") as f:
+    with open(todolist_path, "r") as f:
         todolist_dict = json.load(f)
 
     todolist_dict[item_id] = description
 
-    with open("todolist.json", "w") as f:
+    with open(todolist_path, "w") as f:
         json.dump(todolist_dict, f)
 
     todo_str = dict_to_string(todolist_dict)
@@ -47,12 +50,12 @@ def add_todo_item(message):
 def finish_todo_item(message):
     item_id = message.text.split(" ")[1]
 
-    with open("todolist.json", "r") as f:
+    with open(todolist_path, "r") as f:
         todolist_dict = json.load(f)
 
     desc = todolist_dict.pop(item_id, None)
 
-    with open("todolist.json", "w") as f:
+    with open(todolist_path, "w") as f:
         json.dump(todolist_dict, f)
 
     todo_str = dict_to_string(todolist_dict)
@@ -73,7 +76,7 @@ def schedule_checker():
 @bot.message_handler(func=lambda message: False)
 def send_daily():
     global added_no_items
-    with open("todolist.json", "r") as f:
+    with open(todolist_path, "r") as f:
         todolist_dict = json.load(f)
 
     n_remaining = len(todolist_dict)
@@ -98,7 +101,7 @@ def send_daily():
 
 if __name__ == "__main__":
     added_no_items = True
-    schedule.every().day.at("16:11").do(send_daily)
+    schedule.every().day.at("23:59").do(send_daily)
     Thread(target=schedule_checker).start()
 
     bot.infinity_polling()
